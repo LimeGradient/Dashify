@@ -80,7 +80,7 @@ CPMAddPackage(
 set(ASIO_INCLUDE_DIR "${boost_SOURCE_DIR}/libs/asio/include/boost")
 include_directories("${boost_SOURCE_DIR}/libs/asio/include")
 include_directories("${boost_SOURCE_DIR}/libs/asio/include/boost")
-target_link_libraries(${PROJECT_NAME} asio)
+target_link_libraries(${PROJECT_NAME} Boost::asio)
 
 CPMAddPackage("gh:CrowCpp/Crow#v1.2.0")
 
