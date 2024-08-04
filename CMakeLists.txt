@@ -3,7 +3,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_CXX_FLAGS "-DPISTACHE_BUILD_TESTS=false")
 
 project(SpotiDash VERSION 1.0.0)
 
@@ -71,14 +70,8 @@ else()
     message(STATUS "didnt find curl :(((((")
 endif()
 
-CPMAddPackage(
-    NAME Boost
-    VERSION 1.84.0
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
-    URL_HASH SHA256=2e64e5d79a738d0fa6fb546c6e5c2bd28f88d268a2a080546f74e5ff98f29d0e
-    OPTIONS "BOOST_ENABLE_CMAKE ON" "BOOST_INCLUDE_LIBRARIES describe" # escape with \\\;
-)
-set(ASIO_INCLUDE_DIR "${boost_SOURCE_DIR}/libs/asio/include/boost")
+CPMAddPackage("gh:boostorg/asio#44238d0")
+set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/include/boost")
 target_link_libraries(${PROJECT_NAME} asio)
 
 CPMAddPackage("gh:CrowCpp/Crow#v1.2.0")
