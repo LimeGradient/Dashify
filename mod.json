@@ -10,5 +10,10 @@
 	"name": "SpotiDash",
 	"version": "v1.0.0",
 	"developer": "LimeGradient",
-	"description": ""
+	"description": "Spotify Integration in GD!",
+	"resources": {
+		"files": [
+			"resources/spotidash.access"
+		]
+	}
 }

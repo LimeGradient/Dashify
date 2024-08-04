@@ -1,4 +1,5 @@
 #include <Geode/Geode.hpp>
+#include "Spotify.hpp"
 
 using namespace geode::prelude;
 
@@ -10,6 +11,12 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		log::debug("Hello from my MenuLayer::init hook! This layer has {} children.", this->getChildrenCount());
+
+		Spotify* spotify = new Spotify();
+		spotify->init();
+
+		Playback* currentPlayback = spotify->getCurrentPlayback();
+		log::info("song name: {}", currentPlayback->songName);
 
 		return true;
 	}
