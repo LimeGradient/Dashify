@@ -76,6 +76,6 @@ target_link_libraries(${PROJECT_NAME} asio)
 
 CPMAddPackage("gh:CrowCpp/Crow#v1.2.0")
 
-target_link_libraries(${PROJECT_NAME} pistache)
+target_link_libraries(${PROJECT_NAME} Crow)
 
 setup_geode_mod(${PROJECT_NAME})
