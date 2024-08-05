@@ -1,5 +1,5 @@
 #include <Geode/Geode.hpp>
-#include "Spotify.hpp"
+#include "Spotify/Spotify.hpp"
 
 using namespace geode::prelude;
 

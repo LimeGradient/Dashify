@@ -10,6 +10,8 @@ file(GLOB_RECURSE SOURCES
     src/*.cpp
     src/*.hpp
     src/lib/*.hpp
+    src/Spotify/*.cpp
+    src/Spotify/*.hpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
@@ -51,6 +53,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE CURL_STATICLIB=1)
 if (WIN32)
     set(CURL_LIBRARY "$ENV{GEODE_SDK}/loader/include/link/${LIB_PLATFORM}/libcurl.lib")
     set_target_properties(curl PROPERTIES IMPORTED_LOCATION "$ENV{GEODE_SDK}/loader/include/link/${LIB_PLATFORM}/libcurl.lib")
+    target_link_libraries(${PROJECT_NAME} ws2_32)
 else()
     set(CURL_LIBRARY "$ENV{GEODE_SDK}/loader/include/link/${LIB_PLATFORM}/libcurl.a")
     set_target_properties(curl PROPERTIES IMPORTED_LOCATION "$ENV{GEODE_SDK}/loader/include/link/${LIB_PLATFORM}/libcurl.a")
@@ -70,21 +73,29 @@ else()
     message(STATUS "didnt find curl :(((((")
 endif()
 
-CPMAddPackage(
-    NAME Boost
-    VERSION 1.84.0
-    URL https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz
-    URL_HASH SHA256=2e64e5d79a738d0fa6fb546c6e5c2bd28f88d268a2a080546f74e5ff98f29d0e
-    OPTIONS "BOOST_ENABLE_CMAKE ON" "BOOST_INCLUDE_LIBRARIES asio" # escape with \\\;
-)
-set(ASIO_INCLUDE_DIR "${boost_SOURCE_DIR}/libs/asio/include/boost")
-include_directories("${boost_SOURCE_DIR}/libs/asio/include")
-include_directories("${boost_SOURCE_DIR}/libs/asio/include/boost")
+find_package(Threads REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} Boost::asio)
+include(FetchContent)
+FetchContent_Declare(asio
+  GIT_REPOSITORY  https://github.com/chriskohlhoff/asio.git
+  GIT_TAG         asio-1-29-0
+  GIT_SHALLOW     TRUE
+)
+FetchContent_MakeAvailable(asio)
+
+add_library(asio INTERFACE)
+target_include_directories(asio INTERFACE ${asio_SOURCE_DIR}/asio/include)
+# Use as standalone library and do not allow deprecated features
+target_compile_definitions(asio INTERFACE ASIO_STANDALONE)
+# Link threads as dependency
+target_link_libraries(asio INTERFACE Threads::Threads)
+
+target_link_libraries(${PROJECT_NAME} asio)
+set(ASIO_INCLUDE_DIR "${asio_SOURCE_DIR}/asio/include")
 
 CPMAddPackage("gh:CrowCpp/Crow#v1.2.0")
 
-target_link_libraries(${PROJECT_NAME} Crow)
+target_link_libraries(${PROJECT_NAME} Crow::Crow)
+
 
 setup_geode_mod(${PROJECT_NAME})
