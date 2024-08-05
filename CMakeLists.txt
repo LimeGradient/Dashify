@@ -16,6 +16,10 @@ file(GLOB_RECURSE SOURCES
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_compile_definitions(WIN32_LEAN_AND_MEAN=1) # geode moment
+endif()
+
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
 else()

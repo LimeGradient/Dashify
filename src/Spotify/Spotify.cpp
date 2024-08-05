@@ -1,8 +1,8 @@
+#include "AuthWebserver.hpp"
 #include <Geode/Geode.hpp>
 #include "Spotify.hpp"
 
 #include "../lib/base64.hpp"
-#include "AuthWebserver.hpp"
 
 void Spotify::init() {
     if (Mod::get()->getSavedValue<std::string>("spotify-code").empty()) {
@@ -10,8 +10,14 @@ void Spotify::init() {
     }
 
     this->spotifyToken = Mod::get()->getSavedValue<std::string>("spotify-code");
-    Webserver* server = new Webserver();
-    server->createServer();
+
+    if (!this->m_isWebserverCreated) {
+        this->m_webserverThread = std::thread([=, this] {
+            Webserver* server = new Webserver(this);
+            server->createServer();
+        });
+        this->m_webserverThread.detach();
+    }
 /*     this->m_webListener.bind([=, this] (web::WebTask::Event* e) {
         if (web::WebResponse* res = e->getValue()) {
             if (res->ok()) {
