@@ -5,25 +5,23 @@
 #include "../lib/base64.hpp"
 
 void Spotify::init() {
-    if (Mod::get()->getSavedValue<std::string>("spotify-code").empty()) {
-        Mod::get()->setSavedValue<std::string>("spotify-code", "MDRkNTcxMWFjZWRkNGE2NWE1N2YzYjI5YmYwZWNmNjU=");
-    }
-
-    this->spotifyToken = Mod::get()->getSavedValue<std::string>("spotify-code");
-
     if (!this->m_isWebserverCreated) {
         this->m_webserverThread = std::thread([=, this] {
             Webserver* server = new Webserver(this);
             server->createServer();
         });
+        log::info("created webserver successfully");
         this->m_webserverThread.detach();
     }
-/*     this->m_webListener.bind([=, this] (web::WebTask::Event* e) {
+}
+
+void Spotify::getAccessToken(std::string code) {
+    this->m_webListener2.bind([=, this] (web::WebTask::Event* e) {
         if (web::WebResponse* res = e->getValue()) {
             if (res->ok()) {
-                auto jsonRes = res->json().unwrap();
-                this->accessToken = jsonRes["access_token"].as_string();
-                log::info("access token for this session: {}", this->accessToken);
+                auto resJson = res->json().unwrap();
+                Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
+                Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
             }
         } else if (e->isCancelled()) {
             log::info("The request was cancelled... So sad :(");
@@ -31,13 +29,14 @@ void Spotify::init() {
     });
 
     auto req = web::WebRequest();
-    req.param("grant_type","client_credentials");
-    req.param("client_id", "32c1a06b2faa4414aa19f3b4caa06a47");
-    req.param("client_secret", base64::from_base64(this->spotifyToken));
-    req.header("Content-Type", "application/x-www-form-urlencoded");
-    this->m_webListener.setFilter(req.post("https://accounts.spotify.com/api/token")); */
+    req.bodyString(fmt::format("code={}&redirect_uri=http%3A%2F%2Flocalhost%3A18080%2Fcallback&grant_type=authorization_code&client_id={}&client_secret={}", 
+        code, 
+        this->clientID,
+        base64::from_base64(this->spotifyToken)
+    ));
 
-    //web::openLinkInBrowser("https://accounts.spotify.com/en/authorize?response_type=code&client_id=32c1a06b2faa4414aa19f3b4caa06a47&scope=user-read-private%20user-read-email&redirect_uri=https%3A%2F%2Fexample.org%2Fcallback");
+    req.header("content-type", "application/x-www-form-urlencoded");
+    this->m_webListener2.setFilter(req.post("https://accounts.spotify.com/api/token"));
 }
 
 Playback* Spotify::getCurrentPlayback() {

@@ -4,6 +4,7 @@
 using namespace geode::prelude;
 
 #include <Geode/modify/MenuLayer.hpp>
+
 class $modify(MyMenuLayer, MenuLayer) {
 	
 	bool init() {
@@ -11,13 +12,14 @@ class $modify(MyMenuLayer, MenuLayer) {
 			return false;
 		}
 
-		log::debug("Hello from my MenuLayer::init hook! This layer has {} children.", this->getChildrenCount());
-
 		Spotify* spotify = new Spotify();
+		spotify->m_isWebserverCreated = false;
 		spotify->init();
 
-		Playback* currentPlayback = spotify->getCurrentPlayback();
-		log::info("song name: {}", currentPlayback->songName);
+/* 		Playback* currentPlayback = spotify->getCurrentPlayback();
+		log::info("song name: {}", currentPlayback->songName); */
+
+		log::debug("Hello from my MenuLayer::init hook! This layer has {} children.", this->getChildrenCount());
 
 		return true;
 	}

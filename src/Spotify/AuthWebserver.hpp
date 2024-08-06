@@ -3,6 +3,7 @@
 #include <crow.h>
 
 #include "Spotify.hpp"
+#include "DataManager.hpp"
 
 class Webserver {
 public:
@@ -11,6 +12,7 @@ public:
     }
 
     void createServer();
+    static std::string generateRandomString(const int len);
 
     Spotify* m_spotify;
 };

@@ -12,7 +12,10 @@ file(GLOB_RECURSE SOURCES
     src/lib/*.hpp
     src/Spotify/*.cpp
     src/Spotify/*.hpp
+    src/Managers/*.hpp
 )
+
+include_directories(src)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
