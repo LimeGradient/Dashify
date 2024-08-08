@@ -29,4 +29,5 @@ protected:
     std::thread m_webserverThread;
     EventListener<web::WebTask> m_webListener;
     EventListener<web::WebTask> m_webListener2;
+    EventListener<web::WebTask> m_refreshTokenListener;
 };

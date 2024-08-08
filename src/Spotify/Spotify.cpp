@@ -13,6 +13,29 @@ void Spotify::init() {
         log::info("created webserver successfully");
         this->m_webserverThread.detach();
     }
+
+    auto refreshToken = Mod::get()->getSavedValue<std::string>("refresh_token");
+
+    this->m_refreshTokenListener.bind([=, this] (web::WebTask::Event* e) {
+        if (web::WebResponse* res = e->getValue()) {
+            if (res->ok()) {
+                auto resJson = res->json().unwrap();
+                Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
+                Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
+            }
+        } else if (e->isCancelled()) {
+            log::info("The request was cancelled... So sad :(");
+        }
+    });
+
+    auto req = web::WebRequest();
+    req.header("content-type", "application/x-www-form-urlencoded");
+    req.bodyString(fmt::format("grant_type=refresh_token&refresh_token={}&client_id={}&client_secret={}", 
+        refreshToken,
+        this->clientID,
+        base64::from_base64(this->spotifyToken)
+    ));
+    this->m_refreshTokenListener.setFilter(req.post("https://accounts.spotify.com/api/token"));
 }
 
 void Spotify::getAccessToken(std::string code) {
@@ -22,6 +45,7 @@ void Spotify::getAccessToken(std::string code) {
                 auto resJson = res->json().unwrap();
                 Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
                 Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
+                log::info("saved refresh token");
             }
         } else if (e->isCancelled()) {
             log::info("The request was cancelled... So sad :(");

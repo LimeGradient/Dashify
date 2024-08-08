@@ -6,15 +6,15 @@ using namespace geode::prelude;
 #include <Geode/modify/MenuLayer.hpp>
 
 class $modify(MyMenuLayer, MenuLayer) {
-	
+
 	bool init() {
 		if (!MenuLayer::init()) {
 			return false;
 		}
 
 		Spotify* spotify = new Spotify();
-		spotify->m_isWebserverCreated = false;
 		spotify->init();
+		spotify->m_isWebserverCreated = true;
 
 /* 		Playback* currentPlayback = spotify->getCurrentPlayback();
 		log::info("song name: {}", currentPlayback->songName); */
