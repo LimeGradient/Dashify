@@ -11,8 +11,10 @@
 	"developer": "LimeGradient",
 	"description": "Spotify Integration in GD!",
 	"resources": {
-		"files": [
-			"resources/spotidash.access"
-		]
+		"spritesheets": {
+			"spotidash-sheet": [
+				"resources/*.png"
+			]
+		}
 	}
 }

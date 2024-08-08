@@ -14,7 +14,7 @@ void Webserver::createServer() {
     CROW_ROUTE(app, "/login")([=,this](const crow::request &req, crow::response &res) {
         std::string state = Webserver::generateRandomString(16);
 
-        res.redirect(fmt::format("https://accounts.spotify.com/authorize?response_type=code&client_id={}&scope=user-read-private%20user-read-email%20user-read-playback-state%20user-modify-playback-state&redirect_uri=http%3A%2F%2Flocalhost%3A18080%2Fcallback&state={}", 
+        res.redirect(fmt::format("https://accounts.spotify.com/authorize?response_type=code&client_id={}&scope=user-read-private%20user-read-email%20user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing&redirect_uri=http%3A%2F%2Flocalhost%3A18080%2Fcallback&state={}", 
             this->m_spotify->clientID,
             state
         ));

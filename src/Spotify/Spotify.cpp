@@ -20,8 +20,9 @@ void Spotify::init() {
         if (web::WebResponse* res = e->getValue()) {
             if (res->ok()) {
                 auto resJson = res->json().unwrap();
+                log::info("json: {}", resJson);
                 Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
-                Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
+                this->accessToken = resJson["access_token"].as_string();
             }
         } else if (e->isCancelled()) {
             log::error("Error with getting the access token from refresh token");
@@ -60,6 +61,22 @@ void Spotify::getAccessToken(std::string code) {
 
     req.header("content-type", "application/x-www-form-urlencoded");
     this->m_webListener2.setFilter(req.post("https://accounts.spotify.com/api/token"));
+}
+
+void Spotify::pausePlayback() {
+    this->m_webListener.bind([=, this] (web::WebTask::Event* e) {
+        if (web::WebResponse* res = e->getValue()) {
+            if (res->ok()) {
+                log::info("Paused Playback");
+            }
+        } else if (e->isCancelled()) {
+            log::error("Error with pausing playback");
+        }
+    });
+    
+    auto req = web::WebRequest();
+    req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
+    this->m_webListener.setFilter(req.put("https://api.spotify.com/v1/me/player/pause"));
 }
 
 Playback* Spotify::getCurrentPlayback() {

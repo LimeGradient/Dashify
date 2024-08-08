@@ -18,6 +18,9 @@ public:
     void init();
     void getAccessToken(std::string code);
 
+    // control playback
+    void pausePlayback();
+
     Playback* getCurrentPlayback();
 
     bool m_isWebserverCreated;
