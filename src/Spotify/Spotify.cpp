@@ -24,7 +24,7 @@ void Spotify::init() {
                 Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
             }
         } else if (e->isCancelled()) {
-            log::info("The request was cancelled... So sad :(");
+            log::error("Error with getting the access token from refresh token");
         }
     });
 
@@ -45,10 +45,9 @@ void Spotify::getAccessToken(std::string code) {
                 auto resJson = res->json().unwrap();
                 Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
                 Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
-                log::info("saved refresh token");
             }
         } else if (e->isCancelled()) {
-            log::info("The request was cancelled... So sad :(");
+            log::error("Error with getting access token from successful login");
         }
     });
 

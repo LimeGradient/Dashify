@@ -28,7 +28,6 @@ void Webserver::createServer() {
         if (state.empty()) {
             log::info("state was not found");
         } else {
-            log::info("code: {}", code);
             this->m_spotify->getAccessToken(code);
         }
 
