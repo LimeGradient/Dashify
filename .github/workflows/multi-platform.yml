@@ -15,6 +15,9 @@ jobs:
         - name: Windows
           os: windows-latest
 
+        - name: MacOS
+          os: macos-latest
+
         - name: Android32
           os: ubuntu-latest
           target: Android32
@@ -48,5 +51,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Build Output
+          name: SpotiDash Build
           path: ${{ steps.build.outputs.build-output }}

@@ -3,10 +3,11 @@
 	"gd": {
 		"win": "2.206",
 		"android": "2.206",
+		"mac": "2.206",
 		"ios": "2.206"
 	},
-	"id": "limegradient.spotidash",
-	"name": "SpotiDash",
+	"id": "limegradient.dashify",
+	"name": "Dashify",
 	"version": "v1.0.0",
 	"developer": "LimeGradient",
 	"description": "Spotify Integration in GD!",
