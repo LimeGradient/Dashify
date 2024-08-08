@@ -7,7 +7,6 @@
 #include <Geode/loader/Event.hpp>
 
 #include "Playback.hpp"
-#include "DataManager.hpp"
 
 using namespace geode::prelude;
 

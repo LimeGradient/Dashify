@@ -12,7 +12,8 @@ file(GLOB_RECURSE SOURCES
     src/lib/*.hpp
     src/Spotify/*.cpp
     src/Spotify/*.hpp
-    src/Managers/*.hpp
+    src/UI/*.cpp
+    src/UI/*.hpp
 )
 
 include_directories(src)

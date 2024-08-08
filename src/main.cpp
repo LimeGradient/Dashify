@@ -5,19 +5,19 @@ using namespace geode::prelude;
 
 #include <Geode/modify/MenuLayer.hpp>
 
-class $modify(MyMenuLayer, MenuLayer) {
-	struct Fields {
-		Spotify* m_spotify;
-	};
+Spotify* m_spotify;
 
+$on_mod(Loaded) {
+	m_spotify = new Spotify();
+	m_spotify->init();
+	m_spotify->m_isWebserverCreated = true;
+}
+
+class $modify(MyMenuLayer, MenuLayer) {
 	bool init() {
 		if (!MenuLayer::init()) {
 			return false;
 		}
-
-		m_fields->m_spotify = new Spotify();
-		m_fields->m_spotify->init();
-		m_fields->m_spotify->m_isWebserverCreated = true;
 
 /* 		Playback* currentPlayback = spotify->getCurrentPlayback();
 		log::info("song name: {}", currentPlayback->songName); */
@@ -39,7 +39,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			if (btn2) {
 				web::openLinkInBrowser("http://localhost:18080/login");
 			} else {
-				m_fields->m_spotify->pausePlayback();
+				m_spotify->pausePlayback();
 			}
 		});
 	}

@@ -3,8 +3,6 @@
 void Webserver::createServer() {
     this->m_spotify->m_isWebserverCreated = true;
 
-    DataManager* dm = new DataManager();
-
     crow::SimpleApp app;
 
     CROW_ROUTE(app, "/")([](){

@@ -2,7 +2,7 @@
 #include <Geode/Geode.hpp>
 #include "Spotify.hpp"
 
-#include "../lib/base64.hpp"
+#include "lib/base64.hpp"
 
 void Spotify::init() {
     if (!this->m_isWebserverCreated) {
@@ -46,6 +46,7 @@ void Spotify::getAccessToken(std::string code) {
                 auto resJson = res->json().unwrap();
                 Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
                 Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
+                this->accessToken = resJson["access_token"].as_string();
             }
         } else if (e->isCancelled()) {
             log::error("Error with getting access token from successful login");
