@@ -64,8 +64,12 @@ void Spotify::getAccessToken(std::string code) {
     this->m_webListener2.setFilter(req.post("https://accounts.spotify.com/api/token"));
 }
 
+std::string Spotify::getToken() {
+    return this->accessToken;
+}
+
 void Spotify::pausePlayback() {
-    this->m_webListener.bind([=, this] (web::WebTask::Event* e) {
+/*     this->m_webListener.bind([=, this] (web::WebTask::Event* e) {
         if (web::WebResponse* res = e->getValue()) {
             if (res->ok()) {
                 log::info("Paused Playback");
@@ -73,11 +77,21 @@ void Spotify::pausePlayback() {
         } else if (e->isCancelled()) {
             log::error("Error with pausing playback");
         }
-    });
+    }); */
     
     auto req = web::WebRequest();
     req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
-    this->m_webListener.setFilter(req.put("https://api.spotify.com/v1/me/player/pause"));
+    req.put("https://api.spotify.com/v1/me/player/pause").listen([](auto value) {
+        log::info("Paused Playback");
+    });
+}
+
+void Spotify::resumePlayback() {
+    auto req = web::WebRequest();
+    req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
+    req.put("https://api.spotify.com/v1/me/player/play").listen([](auto value) {
+        log::info("Resumed Playback");
+    });
 }
 
 Playback* Spotify::getCurrentPlayback() {
@@ -87,14 +101,15 @@ Playback* Spotify::getCurrentPlayback() {
         if (web::WebResponse* res = e->getValue()) {
             if (res->ok()) {
                 auto jsonRes = res->json().unwrap();
-                playback->songName = jsonRes["item"]["name"].as_string();
+                playback->albumCoverURL = jsonRes["item"]["album"]["images"][1]["url"].as_string();
                 playback->albumName = jsonRes["item"]["album"]["name"].as_string();
-                playback->albumCoverURL = jsonRes["item"]["album"]["images"][0]["url"].as_string();
+                playback->songName = jsonRes["item"]["name"].as_string();
 
                 auto artists = jsonRes["item"]["artists"].as_array();
                 for (auto artist : artists) {
                     playback->artists.push_back(new Artist(artist["name"].as_string()));
                 }
+                log::info("Got current playing song");
             }
         } else if (e->isCancelled()) {
             log::info("The request was cancelled... So sad :(");
@@ -105,5 +120,7 @@ Playback* Spotify::getCurrentPlayback() {
     req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
     this->m_webListener.setFilter(req.get("https://api.spotify.com/v1/me/player"));
 
-    return playback;
+    if (this->m_isPlaybackGETFinished) {
+        return playback;
+    }
 }

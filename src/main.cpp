@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include "Spotify/Spotify.hpp"
+#include "UI/Playhead.hpp"
 
 using namespace geode::prelude;
 
@@ -19,6 +20,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 			return false;
 		}
 
+		CCDirector* director = CCDirector::get();
+
 /* 		Playback* currentPlayback = spotify->getCurrentPlayback();
 		log::info("song name: {}", currentPlayback->songName); */
 
@@ -27,6 +30,13 @@ class $modify(MyMenuLayer, MenuLayer) {
 			this,
 			menu_selector(MyMenuLayer::onLoginButton)
 		);
+
+		if (!CCScene::get()->getChildByID("dashify-playhead")) {
+			auto playheadMenu = Playhead::create(m_spotify);
+			playheadMenu->setPosition({0.f, 0.f});
+			this->addChild(playheadMenu);
+			SceneManager::get()->keepAcrossScenes(playheadMenu);
+		}
 
 		auto menu = this->getChildByID("bottom-menu");
 		menu->addChild(loginButton);
