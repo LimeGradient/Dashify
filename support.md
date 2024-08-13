@@ -1,1 +1,1 @@
-Edit this file to change your mod's support info, or delete it if you don't need it.
+Donations are always appreciated on my [Kofi!](https://ko-fi.com/limegradient)
