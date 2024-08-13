@@ -1,18 +1,17 @@
 #include "AuthWebserver.hpp"
 #include <Geode/Geode.hpp>
 #include "Spotify.hpp"
+#include "UI/Playhead.hpp"
 
 #include "lib/base64.hpp"
 
 void Spotify::init() {
-    if (!this->m_isWebserverCreated) {
-        this->m_webserverThread = std::thread([=, this] {
-            Webserver* server = new Webserver(this);
-            server->createServer();
-        });
-        log::info("created webserver successfully");
-        this->m_webserverThread.detach();
-    }
+    this->m_webserverThread = std::thread([=, this] {
+        Webserver* server = new Webserver(this);
+        server->createServer();
+    });
+    log::info("created webserver successfully");
+    this->m_webserverThread.detach();
 
     auto refreshToken = Mod::get()->getSavedValue<std::string>("refresh_token");
 
@@ -47,6 +46,9 @@ void Spotify::getAccessToken(std::string code) {
                 Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
                 Mod::get()->setSavedValue<std::string>("refresh_token", resJson["refresh_token"].as_string());
                 this->accessToken = resJson["access_token"].as_string();
+
+                auto dashifyPlayhead = static_cast<Playhead*>(CCScene::get()->getChildByID("dashify-playhead"));
+                dashifyPlayhead->init(this);
             }
         } else if (e->isCancelled()) {
             log::error("Error with getting access token from successful login");
@@ -91,6 +93,22 @@ void Spotify::resumePlayback() {
     req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
     req.put("https://api.spotify.com/v1/me/player/play").listen([](auto value) {
         log::info("Resumed Playback");
+    });
+}
+
+void Spotify::skipSong() {
+    auto req = web::WebRequest();
+    req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
+    req.post("https://api.spotify.com/v1/me/player/next").listen([](auto value) {
+        log::info("Skipped Song");
+    });
+}
+
+void Spotify::previousSong() {
+    auto req = web::WebRequest();
+    req.header("Authorization", fmt::format("Bearer {}", this->accessToken));
+    req.post("https://api.spotify.com/v1/me/player/previous").listen([](auto value) {
+        log::info("Went back one Song");
     });
 }
 

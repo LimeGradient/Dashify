@@ -11,11 +11,37 @@
 	"version": "v1.0.0",
 	"developer": "LimeGradient",
 	"description": "Spotify Integration in GD!",
+	"dependencies": [
+		{
+			"id": "geode.custom-keybinds",
+			"version": ">=v1.7.0",
+			"importance": "required"
+		}
+	],
 	"resources": {
 		"spritesheets": {
 			"spotidash-sheet": [
 				"resources/*.png"
 			]
+		}
+	},
+	"settings": {
+		"show-only-editor": {
+			"name": "Show Only in Editor",
+			"description": "Show the Playhead only in the editor",
+			"type": "bool",
+			"default": false
+		},
+		"playhead-opacity": {
+			"name": "Playhead Opacity",
+			"description": "Change the opacity of the Playhead",
+			"type": "float",
+			"default": 100,
+			"min": 10,
+			"max": 100,
+			"control": {
+				"slider": true
+			}
 		}
 	}
 }

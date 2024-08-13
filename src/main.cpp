@@ -5,13 +5,42 @@
 using namespace geode::prelude;
 
 #include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/LevelEditorLayer.hpp>
+
+#include <geode.custom-keybinds/include/Keybinds.hpp>
+
+using namespace keybinds;
 
 Spotify* m_spotify;
+bool showPlayhead = true;
 
 $on_mod(Loaded) {
 	m_spotify = new Spotify();
 	m_spotify->init();
-	m_spotify->m_isWebserverCreated = true;
+}
+
+$execute {
+	BindManager::get()->registerBindable({
+		"show-playhead"_spr,
+		"Show Dashify Playhead",
+		"Show/Hide the Dashify Playhead",
+		{ Keybind::create(KEY_Q, Modifier::None) },
+		"Dashify"
+	});
+
+	new EventListener([=](InvokeBindEvent* event) {
+		if (event->isDown()) {
+			if (CCScene::get()->getChildByID("dashify-playhead")) {
+				auto playheadNode = static_cast<Playhead*>(CCScene::get()->getChildByID("dashify-playhead"));
+
+				showPlayhead = !showPlayhead;
+				playheadNode->setVisible(showPlayhead);
+				log::info("show playhead: {}", showPlayhead);
+			}
+		}
+
+		return ListenerResult::Propagate;
+	}, InvokeBindFilter(nullptr, "show-playhead"_spr));
 }
 
 class $modify(MyMenuLayer, MenuLayer) {
@@ -20,37 +49,30 @@ class $modify(MyMenuLayer, MenuLayer) {
 			return false;
 		}
 
-		CCDirector* director = CCDirector::get();
-
-/* 		Playback* currentPlayback = spotify->getCurrentPlayback();
-		log::info("song name: {}", currentPlayback->songName); */
-
-		auto loginButton = CCMenuItemSpriteExtra::create(
-			CCSprite::createWithSpriteFrameName("spotidash-button.png"_spr),
-			this,
-			menu_selector(MyMenuLayer::onLoginButton)
-		);
-
-		if (!CCScene::get()->getChildByID("dashify-playhead")) {
+		if (!CCScene::get()->getChildByID("dashify-playhead") && Mod::get()->getSettingValue<bool>("show-only-editor") == false) {
 			auto playheadMenu = Playhead::create(m_spotify);
 			playheadMenu->setPosition({0.f, 0.f});
 			this->addChild(playheadMenu);
 			SceneManager::get()->keepAcrossScenes(playheadMenu);
 		}
 
-		auto menu = this->getChildByID("bottom-menu");
-		menu->addChild(loginButton);
-
 		return true;
 	}
+};
 
-	void onLoginButton(CCObject*) {
-		geode::createQuickPopup("Authorize?", "This will redirect you to Spotify's authorization screen.", "Cancel", "Ok", [this](auto, bool btn2) {
-			if (btn2) {
-				web::openLinkInBrowser("http://localhost:18080/login");
-			} else {
-				m_spotify->pausePlayback();
-			}
-		});
+class $modify(LevelEditorLayer) {
+	bool init(GJGameLevel* p0, bool p1) {
+		if (!LevelEditorLayer::init(p0, p1)) {
+			return false;
+		}
+
+		if (!CCScene::get()->getChildByID("dashify-playhead") && Mod::get()->getSettingValue<bool>("show-only-editor") == true) {
+			auto playheadMenu = Playhead::create(m_spotify);
+			playheadMenu->setPosition({0.f, 0.f});
+			playheadMenu->setZOrder(101);
+			this->addChild(playheadMenu);
+		}
+
+		return true;
 	}
 };

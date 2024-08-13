@@ -8,13 +8,18 @@ using namespace geode::prelude;
 
 class Playhead : public CCNode {
 protected:
-    bool init(Spotify* spotify);
+    void setPlayback();
 
+    void onLogin(CCObject*);
     void onPauseOrPlay(CCObject*);
+    void onSkip(CCObject*);
+    void onPrevious(CCObject*);
+    void onVolumeChange(CCObject*);
 
     Spotify* spotify;
     bool m_isPauseButton;
 
+    CCMenuItemSpriteExtra* m_playControlButton;
     CCLabelBMFont* m_songTitleLabel;
     CCLabelBMFont* m_songArtistsLabel;
     CCLabelBMFont* m_albumTitleLabel;
@@ -22,5 +27,6 @@ protected:
 
     EventListener<web::WebTask> m_webListener;
 public:
+    bool init(Spotify* spotify);
     static Playhead* create(Spotify* spotify);
 };

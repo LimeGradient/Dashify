@@ -23,6 +23,9 @@ public:
     void pausePlayback();
     void resumePlayback();
 
+    void skipSong();
+    void previousSong();
+
     Playback* getCurrentPlayback();
 
     bool m_isWebserverCreated;
