@@ -19,7 +19,6 @@ void Spotify::init() {
         if (web::WebResponse* res = e->getValue()) {
             if (res->ok()) {
                 auto resJson = res->json().unwrap();
-                log::info("json: {}", resJson);
                 Mod::get()->setSavedValue<std::string>("access_token", resJson["access_token"].as_string());
                 this->accessToken = resJson["access_token"].as_string();
             }

@@ -106,19 +106,23 @@ bool Playhead::init(Spotify* spotify) {
 void Playhead::setPlayback() {
     m_playbackListener.bind([=, this] (web::WebTask::Event* e) {
         if (web::WebResponse* res = e->getValue()) {
+            log::info("IM REQUESTING THE PLAYBACK");
             if (res->code() == 429) {
                 requestSleepTime = 3.f;
             } else if (res->ok()) {
                 std::vector<Artist*> artists;
 
-                auto body = res->string().unwrapOr("no-spotify");
+                auto body = res->string().unwrap();
                 log::info("playback body: {}", body);
                 if (!body.empty()) {
+                    log::info("I HAVE SUCCESSFULLY REQUESTED THE PLAYBACK");
                     auto jsonRes = res->json().unwrap();
                     auto isPlaying = jsonRes["is_playing"].as_bool();
                     auto albumCoverURL = jsonRes["item"]["album"]["images"][0]["url"].as_string();
                     auto albumName = jsonRes["item"]["album"]["name"].as_string();
                     auto songName = jsonRes["item"]["name"].as_string();
+                    log::info("ALBUM NAME: {}", albumName);
+                    log::info("SONG NAME: {}", songName);
 
                     auto artistsJSON = jsonRes["item"]["artists"].as_array();
                     for (auto artist : artistsJSON) {

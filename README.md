@@ -1,23 +1,13 @@
-# SpotiDash
+# Dashify
 This is where she makes a mod.
 
 <img src="logo.png" width="150" alt="the mod's logo" />
 
-*Update logo.png to change your mod's icon (please)*
+Dashify brings Spotify Integration to GD! You can see your currently playing song and control your playback (if you have Spotify Premium).  
+You can also toggle the Playhead using either the button located at the top left of your screen or by pressing P.
 
-## Getting started
-We recommend heading over to [the getting started section on our docs](https://docs.geode-sdk.org/getting-started/) for useful info on what to do next.
+We do NOT collect any of your data via the use of this mod. All data is stored locally on your machine.
 
-## Build instructions
-For more info, see [our docs](https://docs.geode-sdk.org/getting-started/create-mod#build)
-```sh
-# Assuming you have the Geode CLI set up already
-geode build
-```
+For Bug Reports, Suggestions, or anything else, [Join the Discord!](https://discord.gg/FtVqAhcWQN)
 
-# Resources
-* [Geode SDK Documentation](https://docs.geode-sdk.org/)
-* [Geode SDK Source Code](https://github.com/geode-sdk/geode/)
-* [Geode CLI](https://github.com/geode-sdk/cli)
-* [Bindings](https://github.com/geode-sdk/bindings/)
-* [Dev Tools](https://github.com/geode-sdk/DevTools)
+Special Thanks to [Dasshu](https://twitter.com/DasshuGames) for the Mod Logo
