@@ -109,8 +109,8 @@ void Playhead::setPlayback() {
             if (res->code() == 429) {
                 requestSleepTime = 3.f;
             } else if (res->code() == 403) {
-                auto jsonRes = res->json().unwrap();
-                log::info("403 Error: {}", jsonRes["error"]["message"]);
+                auto jsonRes = res->string().unwrap();
+                log::info("403 Error: {}", jsonRes);
             } else if (res->ok()) {
                 std::vector<Artist*> artists;
 
