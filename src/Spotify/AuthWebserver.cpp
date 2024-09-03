@@ -26,12 +26,14 @@ void Webserver::createServer() {
         if (state.empty()) {
             log::info("state was not found");
         } else {
+            res.write("Dashify Authorized! You can safely return to Geometry Dash.");
             this->m_spotify->getAccessToken(code);
         }
 
         res.end();
     });
 
+    app.loglevel(crow::LogLevel::Warning);
     app.port(18080).multithreaded().run_async();
 }
 

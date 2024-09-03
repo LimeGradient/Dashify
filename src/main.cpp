@@ -10,7 +10,7 @@ using namespace geode::prelude;
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 
 Spotify* m_spotify;
-bool showPlayhead;
+bool showPlayhead = true;
 
 $on_mod(Loaded) {
 	m_spotify = new Spotify();
@@ -40,13 +40,15 @@ class $modify(DashifyMenuLayer, MenuLayer) {
 			this->addChild(menu);
 			SceneManager::get()->keepAcrossScenes(menu);
 
+			auto dashifyButtonSprite = CCSprite::createWithSpriteFrameName("dashify-button.png"_spr);
+			dashifyButtonSprite->setScale(.65f);
+
 			auto dashifyPlayheadButton = CCMenuItemSpriteExtra::create(
-				CCSprite::createWithSpriteFrameName("dashify-button.png"_spr),
+				dashifyButtonSprite,
 				this,
 				menu_selector(DashifyMenuLayer::onDashifyButton)
 			);
 			dashifyPlayheadButton->setPosition({director->getScreenLeft() + 19.f, director->getScreenTop() - 50.f});
-			dashifyPlayheadButton->setScale(0.65f);
 			dashifyPlayheadButton->setID("dashify-button");
 			menu->addChild(dashifyPlayheadButton);
 		}
@@ -55,9 +57,6 @@ class $modify(DashifyMenuLayer, MenuLayer) {
 	}
 
 	void onDashifyButton(CCObject* sender) {
-		auto senderNode = static_cast<CCMenuItemSpriteExtra*>(sender);
-		senderNode->setScale(0.65f);
-
 		if (CCScene::get()->getChildByID("dashify-playhead")) {
 			auto playheadNode = CCScene::get()->getChildByID("dashify-playhead");
 

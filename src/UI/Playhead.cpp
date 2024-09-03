@@ -3,6 +3,8 @@
 EventListener<web::WebTask> m_playbackListener;
 EventListener<web::WebTask> m_imageDataListener;
 
+float requestSleepTime = 1.5f;
+
 bool Playhead::init(Spotify* spotify) {
     this->spotify = spotify;
 
@@ -13,9 +15,9 @@ bool Playhead::init(Spotify* spotify) {
     menu->setPosition({0.f, 0.f});
     this->addChild(menu);
 
-    auto background = CCScale9Sprite::create("GJ_square01.png", {0.f, 0.f, 80.f, 80.f});
-    background->setContentSize({220.f, background->getContentHeight() + 25.f});
-    background->setPosition({director->getScreenRight() - 115.f, director->getScreenTop() - 60.f});
+    auto background = CCScale9Sprite::create("GJ_square05.png", {0.f, 0.f, 80.f, 80.f});
+    background->setContentSize({220.f, background->getContentHeight() - 10.f});
+    background->setPosition({director->getScreenRight() - 115.f, director->getScreenTop() - 40.f});
     background->setID("dashify-playhead-background");
     menu->addChild(background);
 
@@ -36,57 +38,61 @@ bool Playhead::init(Spotify* spotify) {
             this,
             menu_selector(Playhead::onPauseOrPlay)
         );
-        m_playControlButton->setPosition({background->getPositionX(), background->getPositionY() - 30.f});
+        m_playControlButton->setPosition({background->getPositionX() + 60.f, background->getPositionY()});
         m_playControlButton->setScale(0.75f);
         m_playControlButton->setID("dashify-play-control-button");
         menu->addChild(m_playControlButton);
 
+        auto skipButtonSprite = CCSprite::createWithSpriteFrameName("fast-forward-button.png"_spr);
+        skipButtonSprite->setScale(0.6f);
+
         auto skipSongButton = CCMenuItemSpriteExtra::create(
-            CCSprite::createWithSpriteFrameName("fast-forward-button.png"_spr),
+            skipButtonSprite,
             this,
             menu_selector(Playhead::onSkip)
         );
-        skipSongButton->setPosition({m_playControlButton->getPositionX() + 40.f, m_playControlButton->getPositionY()});
-        skipSongButton->setScale(0.6f);
+        skipSongButton->setPosition({m_playControlButton->getPositionX() + 30.f, m_playControlButton->getPositionY()});
         skipSongButton->setID("dashify-skip-song-button");
         menu->addChild(skipSongButton);
 
+        CCSprite* previousButtonSprite = CCSprite::createWithSpriteFrameName("back-button.png"_spr);
+        previousButtonSprite->setScale(0.6f);
+
         auto previousSongButton = CCMenuItemSpriteExtra::create(
-            CCSprite::createWithSpriteFrameName("back-button.png"_spr),
+            previousButtonSprite,
             this,
             menu_selector(Playhead::onPrevious)
         );
-        previousSongButton->setPosition({m_playControlButton->getPositionX() - 40.f, m_playControlButton->getPositionY()});
-        previousSongButton->setScale(0.6f);
+        previousSongButton->setPosition({m_playControlButton->getPositionX() - 30.f, m_playControlButton->getPositionY()});
         previousSongButton->setID("dashify-previous-song-button");
         menu->addChild(previousSongButton);
 
         m_songTitleLabel = CCLabelBMFont::create("", "bigFont.fnt");
-        m_songTitleLabel->setPosition({background->getPositionX() + 30.f, background->getPositionY() + 35.f});
-        m_songTitleLabel->setScale(0.25f);
+        m_songTitleLabel->setPosition({background->getPositionX() - 24.f, background->getPositionY() + 15.f});
+        m_songTitleLabel->setScale(0.2f);
         m_songTitleLabel->setID("dashify-song-title-label");
         menu->addChild(m_songTitleLabel);
 
         m_albumTitleLabel = CCLabelBMFont::create("", "bigFont.fnt");
-        m_albumTitleLabel->setPosition({background->getPositionX() + 30.f, background->getPositionY() + 22.5f});
-        m_albumTitleLabel->setScale(0.25f);
+        m_albumTitleLabel->setPosition({background->getPositionX() - 24.f, background->getPositionY() + 2.5f});
+        m_albumTitleLabel->setScale(0.2f);
         m_albumTitleLabel->setID("dashify-album-title-label");
         menu->addChild(m_albumTitleLabel);
 
         m_songArtistsLabel = CCLabelBMFont::create("", "bigFont.fnt");
-        m_songArtistsLabel->setPosition({background->getPositionX() + 30.f, background->getPositionY() + 10.f});
-        m_songArtistsLabel->setScale(0.25f);
+        m_songArtistsLabel->setPosition({background->getPositionX() - 24.f, background->getPositionY() - 10.f});
+        m_songArtistsLabel->setScale(0.2f);
         m_songArtistsLabel->setID("dashify-song-artists-label");
         menu->addChild(m_songArtistsLabel);
 
         m_albumCoverSprite = CCSprite::createWithSpriteFrameName("default-album-cover.png"_spr);
-        m_albumCoverSprite->setPosition({background->getPositionX() - 70.f, background->getPositionY() + 15.f});
-        m_albumCoverSprite->setScale(0.75f);
+        m_albumCoverSprite->setPosition({background->getPositionX() - 84.f, background->getPositionY()});
+        m_albumCoverSprite->setScale(0.25f);
         m_albumCoverSprite->setID("dashify-album-cover-sprite");
         menu->addChild(m_albumCoverSprite);
 
         this->setPlayback();
-        this->schedule(schedule_selector(Playhead::setPlayback), 2.f);
+        this->schedule(schedule_selector(Playhead::setPlayback), requestSleepTime);
         
         this->m_isPauseButton = true;
     }
@@ -101,62 +107,83 @@ void Playhead::setPlayback() {
     m_playbackListener.bind([=, this] (web::WebTask::Event* e) {
         if (web::WebResponse* res = e->getValue()) {
             if (res->code() == 429) {
-                Notification::create("Dashify Error: Too Many Requests", NotificationIcon::Error)->show();
+                requestSleepTime = 3.f;
             } else if (res->ok()) {
                 std::vector<Artist*> artists;
 
-                auto jsonRes = res->json().unwrap();
-                auto isPlaying = jsonRes["is_playing"].as_bool();
-                auto albumCoverURL = jsonRes["item"]["album"]["images"][0]["url"].as_string();
-                auto albumName = jsonRes["item"]["album"]["name"].as_string();
-                auto songName = jsonRes["item"]["name"].as_string();
+                auto body = res->string().unwrapOr("no-spotify");
+                log::info("playback body: {}", body);
+                if (body != "no-spotify") {
+                    auto jsonRes = res->json().unwrap();
+                    auto isPlaying = jsonRes["is_playing"].as_bool();
+                    auto albumCoverURL = jsonRes["item"]["album"]["images"][0]["url"].as_string();
+                    auto albumName = jsonRes["item"]["album"]["name"].as_string();
+                    auto songName = jsonRes["item"]["name"].as_string();
 
-                auto artistsJSON = jsonRes["item"]["artists"].as_array();
-                for (auto artist : artistsJSON) {
-                    artists.push_back(new Artist(artist["name"].as_string()));
-                }
+                    auto artistsJSON = jsonRes["item"]["artists"].as_array();
+                    for (auto artist : artistsJSON) {
+                        artists.push_back(new Artist(artist["name"].as_string()));
+                    }
 
-                m_imageDataListener.bind([=, this] (web::WebTask::Event* e) {
-                    if (web::WebResponse* res = e->getValue()) {
-                        if (res->ok()) {
-                            auto imageData = res->data();
-                            CCImage* image = new CCImage();
-                            image->initWithImageData(const_cast<uint8_t*>(imageData.data()), imageData.size());
-                            
-                            CCTexture2D* texture = new CCTexture2D();
-                            texture->initWithImage(image);
+                    if (albumName.size() > 16) {
+                        albumName.erase(16, std::string::npos);
+                        albumName += "...";
+                    }
 
-                            this->m_albumCoverSprite->initWithTexture(texture);
-                            this->m_albumCoverSprite->setScale(0.35f);
+                    if (songName.size() > 16) {
+                        songName.erase(16, std::string::npos);
+                        songName += "...";
+                    }
 
-                            image->release();
-                            texture->release();
+                    m_imageDataListener.bind([=, this] (web::WebTask::Event* e) {
+                        if (web::WebResponse* res = e->getValue()) {
+                            if (res->ok()) {
+                                auto imageData = res->data();
+                                CCImage* image = new CCImage();
+                                image->initWithImageData(const_cast<uint8_t*>(imageData.data()), imageData.size());
+                                
+                                CCTexture2D* texture = new CCTexture2D();
+                                texture->initWithImage(image);
+
+                                this->m_albumCoverSprite->initWithTexture(texture);
+                                this->m_albumCoverSprite->setScale(0.25f);
+
+                                image->release();
+                                texture->release();
+                            }
+                        } else if (e->isCancelled()) {
+                            log::error("Error with image data");
                         }
-                    } else if (e->isCancelled()) {
-                        log::error("Error with image data");
+                    });
+
+                    auto playButtonSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+                    playButtonSprite->setScale(0.5f);
+
+                    this->m_playControlButton->setSprite((isPlaying) ? CCSprite::createWithSpriteFrameName("GJ_pauseEditorBtn_001.png") : playButtonSprite);
+                    this->m_playControlButton->setScale(0.75f);
+
+                    auto imageReq = web::WebRequest();
+                    m_imageDataListener.setFilter(imageReq.get(albumCoverURL));
+
+                    this->m_albumTitleLabel->setString(fmt::format("On {}", albumName).c_str());
+                    this->m_songTitleLabel->setString(songName.c_str());
+
+                    std::string artistsLabelText = "By ";
+                    for (int i = 0; i < artists.size(); i++) {
+                        if (artists[i] != artists.back()) {
+                            artistsLabelText += artists[i]->name + ", ";
+                        } else {
+                            artistsLabelText += artists[i]->name;
+                        }
                     }
-                });
 
-                auto playButtonSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-                playButtonSprite->setScale(0.5f);
-
-                this->m_playControlButton->setSprite((isPlaying) ? CCSprite::createWithSpriteFrameName("GJ_pauseEditorBtn_001.png") : playButtonSprite);
-
-                auto imageReq = web::WebRequest();
-                m_imageDataListener.setFilter(imageReq.get(albumCoverURL));
-
-                this->m_albumTitleLabel->setString(fmt::format("On {}", albumName).c_str());
-                this->m_songTitleLabel->setString(songName.c_str());
-
-                std::string artistsLabelText = "By ";
-                for (int i = 0; i < artists.size(); i++) {
-                    if (artists[i] != artists.back()) {
-                        artistsLabelText += artists[i]->name + ", ";
-                    } else {
-                        artistsLabelText += artists[i]->name;
+                    if (artistsLabelText.size() > 16) {
+                        artistsLabelText.erase(16, std::string::npos);
+                        artistsLabelText += "...";
                     }
+
+                    this->m_songArtistsLabel->setString(artistsLabelText.c_str());
                 }
-                this->m_songArtistsLabel->setString(artistsLabelText.c_str());
             }
         } else if (e->isCancelled()) {
             log::error("playback request was cancelled");
@@ -185,7 +212,9 @@ void Playhead::onPauseOrPlay(CCObject* sender) {
     auto playButtonSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
     playButtonSprite->setScale(0.5f);
 
-    senderNode->setSprite((this->m_isPauseButton) ? playButtonSprite : CCSprite::createWithSpriteFrameName("GJ_pauseEditorBtn_001.png"));
+    auto pauseButtonSprite = CCSprite::createWithSpriteFrameName("GJ_pauseEditorBtn_001.png");
+
+    senderNode->setSprite((this->m_isPauseButton) ? playButtonSprite : pauseButtonSprite);
     senderNode->setScale(0.75f);
     if (this->m_isPauseButton) {
         this->spotify->pausePlayback();
@@ -197,16 +226,10 @@ void Playhead::onPauseOrPlay(CCObject* sender) {
 }
 
 void Playhead::onSkip(CCObject* sender) {
-    auto senderNode = static_cast<CCMenuItemSpriteExtra*>(sender);
-    senderNode->setScale(0.6f);
-
     this->spotify->skipSong();
 }
 
 void Playhead::onPrevious(CCObject* sender) {
-    auto senderNode = static_cast<CCMenuItemSpriteExtra*>(sender);
-    senderNode->setScale(0.6f);
-
     this->spotify->previousSong();
 }
 

@@ -16,7 +16,10 @@
 			"spotidash-sheet": [
 				"resources/*.png"
 			]
-		}
+		},
+		"files": [
+			"src/crow_pages/callback.html"
+		]
 	},
 	"links": {
 		"source": "https://github.com/LimeGradient/Dashify",
