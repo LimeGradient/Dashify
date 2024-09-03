@@ -113,7 +113,7 @@ void Playhead::setPlayback() {
 
                 auto body = res->string().unwrapOr("no-spotify");
                 log::info("playback body: {}", body);
-                if (body != "no-spotify") {
+                if (!body.empty()) {
                     auto jsonRes = res->json().unwrap();
                     auto isPlaying = jsonRes["is_playing"].as_bool();
                     auto albumCoverURL = jsonRes["item"]["album"]["images"][0]["url"].as_string();
@@ -156,12 +156,6 @@ void Playhead::setPlayback() {
                         }
                     });
 
-                    auto playButtonSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-                    playButtonSprite->setScale(0.5f);
-
-                    this->m_playControlButton->setSprite((isPlaying) ? CCSprite::createWithSpriteFrameName("GJ_pauseEditorBtn_001.png") : playButtonSprite);
-                    this->m_playControlButton->setScale(0.75f);
-
                     auto imageReq = web::WebRequest();
                     m_imageDataListener.setFilter(imageReq.get(albumCoverURL));
 
@@ -183,6 +177,8 @@ void Playhead::setPlayback() {
                     }
 
                     this->m_songArtistsLabel->setString(artistsLabelText.c_str());
+                } else {
+                    this->m_albumTitleLabel->setString("No Spotify Detected.");
                 }
             }
         } else if (e->isCancelled()) {

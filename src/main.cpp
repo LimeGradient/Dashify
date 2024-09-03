@@ -48,7 +48,7 @@ class $modify(DashifyMenuLayer, MenuLayer) {
 				this,
 				menu_selector(DashifyMenuLayer::onDashifyButton)
 			);
-			dashifyPlayheadButton->setPosition({director->getScreenLeft() + 19.f, director->getScreenTop() - 50.f});
+			dashifyPlayheadButton->setPosition({director->getScreenRight() - 19.f, director->getScreenTop() - 100.f});
 			dashifyPlayheadButton->setID("dashify-button");
 			menu->addChild(dashifyPlayheadButton);
 		}
