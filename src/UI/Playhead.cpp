@@ -106,7 +106,7 @@ bool Playhead::init(Spotify* spotify) {
 void Playhead::setPlayback() {
     m_playbackListener.bind([=, this] (web::WebTask::Event* e) {
         if (web::WebResponse* res = e->getValue()) {
-            log::info("IM REQUESTING THE PLAYBACK");
+            log::info("IM REQUESTING THE PLAYBACK. I HAVE CODE {}", res->code());
             if (res->code() == 429) {
                 requestSleepTime = 3.f;
             } else if (res->ok()) {
